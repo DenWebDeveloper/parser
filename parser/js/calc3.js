@@ -19682,7 +19682,9 @@ function select_location(obj) {
 
 
 
-
+$('.price-c').on('keyup', function() {
+    get_calc()
+});
 // Calculator ######################
 var price_auction, price_country, exit_port_val, exit_port_id, price_select, subauction_id, subcountry_id;
 

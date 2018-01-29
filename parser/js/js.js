@@ -17003,21 +17003,24 @@ function select_location(obj) {
         price_select = $('.price_selects').find('option:selected').val();
     if (subauction_id && price_select) {
         price_select = price_select.split('price_');
-        $('.exit_port').find('option').each(function(i, elem) {
+
+        $('.exit_port').find('option,span').each(function(i, elem) {
             var exit_port_val = $(elem).attr('value'),
                 exit_port_html = $(elem).html();
+
             if (exit_port_val != '') {
                 var exit_port_val_ex = exit_port_val.split(';'),
                     exit_port_id = exit_port_val_ex[0];
+
                 if (auction_prices_js[subauction_id] && auction_prices_js[subauction_id][exit_port_id] && auction_prices_js[subauction_id][exit_port_id][price_select[1]]) {
-                    $(elem).replaceWith("<option value='" + exit_port_val + "'>" + exit_port_html + "</option>")
+                    $(elem).replaceWith("<option value='" + exit_port_val + "'>" + exit_port_html + "</option>");
                 } else if (ap_prices_js && ap_prices_js[exit_port_id] && ap_prices_js[exit_port_id][price_select[1]]) {
-                    $(elem).replaceWith("<option value='" + exit_port_val + "'>" + exit_port_html + "</option>")
+                    $(elem).replaceWith("<option value='" + exit_port_val + "'>" + exit_port_html + "</option>");
                 } else {
-                    $(elem).replaceWith("<span value='" + exit_port_val + "' style='display:none;'>" + exit_port_html + "</span>")
+                    $(elem).replaceWith("<span value='" + exit_port_val + "' style='display:none;'>" + exit_port_html + "</span>");
                 }
             }
-        })
+        });
     }
 }
 $('.price-c').on('keyup', function() {
@@ -17033,6 +17036,7 @@ function get_calc() {
     subcountry_id = 0;
     exit_port_val = $('.exit_port').find('option:selected').val();
     price_select = $('.price_selects').find('option:selected').val();
+    full_price_select = price_select;
     subauction_id = $('.subauction').find('option:selected').val();
     subcountry_id = $('.subcountry').find('option:selected').val();
     $('.price_total').hide();
@@ -17043,8 +17047,16 @@ function get_calc() {
         exit_port_id = exit_port_val_ex[0]
     }
     if (exit_port_id && subauction_id) {
-        if (country_prices_js[subcountry_id] && country_prices_js[subcountry_id][exit_port_id] && country_prices_js[subcountry_id][exit_port_id]['3cars']) $('.price_3cars').parent().find('.print_price').html(format_dollar(country_prices_js[subcountry_id][exit_port_id]['3cars']));
-        if (country_prices_js[subcountry_id] && country_prices_js[subcountry_id][exit_port_id] && country_prices_js[subcountry_id][exit_port_id]['2cars']) $('.price_2cars').parent().find('.print_price').html(format_dollar(country_prices_js[subcountry_id][exit_port_id]['2cars']))
+        if (country_prices_js[subcountry_id] && country_prices_js[subcountry_id][exit_port_id] && country_prices_js[subcountry_id][exit_port_id]['3cars'])  {
+          $('.price_3cars').parent().find('.print_price').html(format_dollar(country_prices_js[subcountry_id][exit_port_id]['3cars']));
+        } else if(price_select == "price_3cars" && country_prices_js[subcountry_id]) {
+          $('.price_3cars').parent().find('.print_price').html(format_dollar(priceSea["price_3cars"][exit_port_id]));
+        }
+        if (country_prices_js[subcountry_id] && country_prices_js[subcountry_id][exit_port_id] && country_prices_js[subcountry_id][exit_port_id]['2cars'])  {
+          $('.price_2cars').parent().find('.print_price').html(format_dollar(country_prices_js[subcountry_id][exit_port_id]['2cars']))
+        } else if(price_select == "price_2cars" && country_prices_js[subcountry_id]) {
+          $('.price_3cars').parent().find('.print_price').html(format_dollar(priceSea["price_2cars"][exit_port_id]));
+        }
     }
     price_auction = 0;
     price_country = 0;
@@ -17052,7 +17064,8 @@ function get_calc() {
         price_select = price_select.split('price_');
         if (subauction_id) {
             if (auction_prices_js[subauction_id] && auction_prices_js[subauction_id][exit_port_id] && auction_prices_js[subauction_id][exit_port_id][price_select[1]]) {
-                price_auction = auction_prices_js[subauction_id][exit_port_id][price_select[1]]
+                price_auction = auction_prices_js[subauction_id][exit_port_id][price_select[1]];
+                $("#type-ground").text(price_auction);
             } else if (ap_prices_js && ap_prices_js[exit_port_id] && ap_prices_js[exit_port_id][price_select[1]]) {
                 price_auction = ap_prices_js[exit_port_id][price_select[1]];
                 $("#type-ground").text(price_auction);
@@ -17062,6 +17075,9 @@ function get_calc() {
             if (country_prices_js[subcountry_id] && country_prices_js[subcountry_id][exit_port_id] && country_prices_js[subcountry_id][exit_port_id][price_select[1]]) {
                 price_country = country_prices_js[subcountry_id][exit_port_id][price_select[1]];
                 $("#type-odessa").text(price_country);
+            } else if(country_prices_js[subcountry_id]) {
+              price_country = priceSea[full_price_select][exit_port_id];
+              $("#type-odessa").text(price_country);
             }
         }
     }
@@ -17075,6 +17091,7 @@ function get_calc() {
         }
         price_total = (price_total + parseInt(price));
         $('.js-load #preloader').show();
+        $('#sendparse').css("display","none");
         $.ajax({
             url: location.href,
             type: 'POST',
@@ -17086,6 +17103,7 @@ function get_calc() {
             },
             success: function(data) {
                 $('.js-load #preloader').hide();
+                $('#sendparse').css("display","block");
                 if (data.cost == 0) {
                     $('.price_total_none').show()
                 } else {
