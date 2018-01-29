@@ -1,0 +1,39 @@
+.list-price {
+  display: none;
+}
+
+#print {
+  margin-bottom: 20px;
+}
+.js-load {
+  position: relative;
+}
+.js-load #preloader {
+    display: none;
+    overflow: hidden;
+    font-weight: bold;
+    background-color: #fff;
+    font-size: 21px;
+    position: absolute;
+    top: 0;
+    left: 0;
+    padding: 10px 0;
+  }
+
+.total_price {
+  font-weight: bold;
+  font-size: 18px;
+}
+.total_price strong {
+    font-size: 21px;
+  }
+
+@media print {
+  .left_form.container {
+    display: none;
+  }
+
+  #print {
+    display: none;
+  }
+}
